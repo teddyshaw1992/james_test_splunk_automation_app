@@ -1,2 +1,2 @@
 Hello World
-A 3rd feature!
+A 3rd feature. Yay!
