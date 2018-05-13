@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo ${GIT_REFLOG_ACTION}
 
@@ -30,4 +30,18 @@ elif [ "${MERGED_TO}" == "master" ]; then
 else
   echo "Error: some other branch"
 fi
+
+
+LATEST_TAG=$( git tag -l | sort -V --reverse | head -n 1 )
+
+#MAJOR_PATCH_NUMBER="$( echo "${LATEST_TAG}" | cut -d '.' -f 4 )"
+MAJOR_PATCH_NUMBER=$( expr "${LATEST_TAG}" : 'v\([[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*\)\.[[:digit:]]*' )
+
+MINOR_PATCH_NUMBER=$( expr "${LATEST_TAG}" : 'v[[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*\.\([[:digit:]]*\)' )
+TAG_VERSION_PATCH_NUMBER=$( ${LATEST_TAG} )
+
+echo ${LATEST_TAG}
+echo ${MAJOR_PATCH_NUMBER}
+echo ${MINOR_PATCH_NUMBER}
+
 
