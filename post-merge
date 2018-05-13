@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# URL for ref: https://stackoverflow.com/questions/12082981/get-all-git-commits-since-last-tag?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+# URL for ref: https://git-scm.com/book/en/v2/Git-Basics-Tagging
+# GLOBAL HOOKS PATH: https://stackoverflow.com/questions/2293498/applying-a-git-post-commit-hook-to-all-current-and-future-repos?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+# LIST TAGS: https://stackoverflow.com/questions/1064499/how-to-list-all-git-tags?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+# REMOVE TAGS: https://stackoverflow.com/questions/5480258/how-to-delete-a-git-remote-tag?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+# LIST AND SORT TAGS: https://stackoverflow.com/questions/14273531/how-to-sort-git-tags-by-version-string-order-of-form-rc-x-y-z-w?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+# FIRST LINE OF BASH OUTPUT: https://stackoverflow.com/questions/46021955/get-first-line-of-a-shell-command-output?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+# BASH REGEX: https://stackoverflow.com/questions/9597751/using-match-to-find-substrings-in-strings-with-only-bash?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+# RELEASE NAMKNG CONVENTIONS: https://www.drupal.org/node/1015226
+# ITERATE THROUGH LINES: https://superuser.com/questions/284187/bash-iterating-over-lines-in-a-variable?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+
+# STOP MERGE MESSAGE EDITS: https://stackoverflow.com/questions/12752288/git-merge-doesnt-use-default-merge-message-opens-editor-with-default-message?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+# IDEA FOR MERGES: https://www.google.com.au/search?q=git+different+default+merge+commit+messages+for+merge+and+conflict&oq=git+different+default+merge+commit+messages+for+merge+and+conflict&aqs=chrome..69i57j69i64.12928j0j4&sourceid=chrome&ie=UTF-8
+# BASH BASIC MATHS: https://askubuntu.com/questions/385528/how-to-increment-a-variable-in-bash?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+
 echo ${GIT_REFLOG_ACTION}
 
 MERGED_FROM=$( echo "${GIT_REFLOG_ACTION}" | cut -d ' ' -f 2 )
@@ -35,13 +50,32 @@ fi
 LATEST_TAG=$( git tag -l | sort -V --reverse | head -n 1 )
 
 #MAJOR_PATCH_NUMBER="$( echo "${LATEST_TAG}" | cut -d '.' -f 4 )"
-MAJOR_PATCH_NUMBER=$( expr "${LATEST_TAG}" : 'v\([[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*\)\.[[:digit:]]*' )
+LATEST_MAJOR_RELEASE_NUMBER=$( expr "${LATEST_TAG}" : 'v\([[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*\)\.[[:digit:]]*' )
 
-MINOR_PATCH_NUMBER=$( expr "${LATEST_TAG}" : 'v[[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*\.\([[:digit:]]*\)' )
-TAG_VERSION_PATCH_NUMBER=$( ${LATEST_TAG} )
+LATEST_MINOR_RELEASE_NUMBER=$( expr "${LATEST_TAG}" : 'v[[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*\.\([[:digit:]]*\)' )
+LATEST_RELEASE_VERSION="v${LATEST_MAJOR_RELEASE_NUMBER}.${LATEST_MINOR_RELEASE_NUMBER}"
 
-echo ${LATEST_TAG}
-echo ${MAJOR_PATCH_NUMBER}
-echo ${MINOR_PATCH_NUMBER}
+echo "OLD TAG: ${LATEST_TAG}"
+echo "OLD MAJOR VERSION NO: ${LATEST_MAJOR_RELEASE_NUMBER}"
+echo "OLD MINOR VERSION NO: ${LATEST_MINOR_RELEASE_NUMBER}"
+
+DATE_WEEK=$((($(date +%-d)-1)/7+1))
+DATE_YEAR_MONTH=$(date "+%y.%m")
+NEW_MAJOR_RELEASE_NUMBER="${DATE_YEAR_MONTH}.${DATE_WEEK}"
+
+if [ "${LATEST_MAJOR_RELEASE_NUMBER}" == "${NEW_MAJOR_RELEASE_NUMBER}" ]; then
+  echo "Same Major Version. Bumping minor version."
+  NEW_MINOR_RELEASE_NUMBER=$(( ${LATEST_MINOR_RELEASE_NUMBER} + 1))
+  NEW_RELEASE_VERSION="v${NEW_MAJOR_RELEASE_NUMBER}.${NEW_MINOR_RELEASE_NUMBER}"
+else
+  NEW_MINOR_RELEASE_NUMBER="0"
+  NEW_RELEASE_VERSION="v${NEW_MAJOR_RELEASE_NUMBER}.${NEW_MINOR_RELEASE_NUMBER}"  
+fi
+
+echo
+echo
+
+echo "OLD_RELEASE_VERSION: ${LATEST_RELEASE_VERSION}"
+echo "NEW_RELEASE_VERSION: ${NEW_RELEASE_VERSION}"
 
 
