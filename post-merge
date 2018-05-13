@@ -1,0 +1,33 @@
+#!/bin/sh
+
+echo ${GIT_REFLOG_ACTION}
+
+MERGED_FROM=$( echo "${GIT_REFLOG_ACTION}" | cut -d ' ' -f 2 )
+
+echo
+echo
+
+echo MERGED FROM: ${MERGED_FROM}
+
+MERGE_ID=$( git rev-parse --verify HEAD^1 )
+MERGED_TO=$( git branch --contains "${MERGE_ID}" | cut -d ' ' -f 2 )
+
+echo MERGED TO: ${MERGED_TO}
+
+
+echo
+echo
+
+if [ "${MERGED_TO}" == "dev" ]; then
+  echo "Merged to dev branch."
+  echo "Updating JIRA ticket for ${MERGED_FROM}"
+elif [ "${MERGED_TO}" == "test" ]; then
+  echo "Merged to test branch."
+  echo "Updating JIRA ticket for ${MERGED_FROM}"
+elif [ "${MERGED_TO}" == "master" ]; then
+  echo "Merged to master branch."
+  echo "Updating JIRA ticket for ${MERGED_FROM} to DONE"
+else
+  echo "Error: some other branch"
+fi
+
