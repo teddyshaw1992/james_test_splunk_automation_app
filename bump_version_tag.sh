@@ -1,0 +1,33 @@
+#!/bin/bash
+
+LATEST_TAG=$( git tag -l | sort -V --reverse | head -n 1 )
+
+LATEST_MAJOR_RELEASE_NUMBER=$( expr "${LATEST_TAG}" : 'v\([[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*\)\.[[:digit:]]*' )
+LATEST_MINOR_RELEASE_NUMBER=$( expr "${LATEST_TAG}" : 'v[[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*\.\([[:digit:]]*\)' )
+LATEST_RELEASE_VERSION="v${LATEST_MAJOR_RELEASE_NUMBER}.${LATEST_MINOR_RELEASE_NUMBER}"
+
+echo "OLD TAG: ${LATEST_TAG}"
+echo "OLD MAJOR VERSION NO: ${LATEST_MAJOR_RELEASE_NUMBER}"
+echo "OLD MINOR VERSION NO: ${LATEST_MINOR_RELEASE_NUMBER}"
+
+DATE_WEEK=$((($(date +%-d)-1)/7+1))
+DATE_YEAR_MONTH=$(date "+%y.%m")
+NEW_MAJOR_RELEASE_NUMBER="${DATE_YEAR_MONTH}.${DATE_WEEK}"
+
+if [ "${LATEST_MAJOR_RELEASE_NUMBER}" == "${NEW_MAJOR_RELEASE_NUMBER}" ]; then
+  echo "Same Major Version. Bumping minor version."
+  NEW_MINOR_RELEASE_NUMBER=$(( ${LATEST_MINOR_RELEASE_NUMBER} + 1))
+  NEW_RELEASE_VERSION="v${NEW_MAJOR_RELEASE_NUMBER}.${NEW_MINOR_RELEASE_NUMBER}"
+else
+  NEW_MINOR_RELEASE_NUMBER="0"
+  NEW_RELEASE_VERSION="v${NEW_MAJOR_RELEASE_NUMBER}.${NEW_MINOR_RELEASE_NUMBER}"  
+fi
+
+echo
+echo
+
+echo "OLD_RELEASE_VERSION: ${LATEST_RELEASE_VERSION}"
+echo "NEW_RELEASE_VERSION: ${NEW_RELEASE_VERSION}"
+
+git tag -a ${NEW_RELEASE_VERSION} -m "New package: ${NEW_RELEASE_VERSION}"
+git push origin ${NEW_RELEASE_VERSION}
