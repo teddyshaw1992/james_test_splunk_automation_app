@@ -29,5 +29,5 @@ echo
 echo "OLD_RELEASE_VERSION: ${LATEST_RELEASE_VERSION}"
 echo "NEW_RELEASE_VERSION: ${NEW_RELEASE_VERSION}"
 
-git tag -a ${NEW_RELEASE_VERSION} -m "New package: ${NEW_RELEASE_VERSION}"
-git push origin ${NEW_RELEASE_VERSION}
+git tag -a "${NEW_RELEASE_VERSION}" -m "New package: ${NEW_RELEASE_VERSION}"
+git push origin "${NEW_RELEASE_VERSION}"

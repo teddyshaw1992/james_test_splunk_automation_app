@@ -40,7 +40,7 @@ elif [ "${MERGED_TO}" == "test" ]; then
   echo "Merged to test branch."
   echo "Updating JIRA ticket for ${MERGED_FROM}"
   # BUMP VERSION SCRIPT
-  source ./bump_version_tag
+  source ./bump_version_tag.sh
 elif [ "${MERGED_TO}" == "master" ]; then
   echo "Merged to master branch."
   echo "Updating JIRA ticket for ${MERGED_FROM} to DONE"
