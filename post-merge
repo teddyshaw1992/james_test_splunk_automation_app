@@ -15,38 +15,45 @@
 # IDEA FOR MERGES: https://www.google.com.au/search?q=git+different+default+merge+commit+messages+for+merge+and+conflict&oq=git+different+default+merge+commit+messages+for+merge+and+conflict&aqs=chrome..69i57j69i64.12928j0j4&sourceid=chrome&ie=UTF-8
 # BASH BASIC MATHS: https://askubuntu.com/questions/385528/how-to-increment-a-variable-in-bash?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 
-echo ${GIT_REFLOG_ACTION}
-
-MERGED_FROM=$( echo "${GIT_REFLOG_ACTION}" | cut -d ' ' -f 2 )
-
-echo
-echo
-
-echo MERGED FROM: ${MERGED_FROM}
-
-MERGE_ID=$( git rev-parse --verify HEAD^1 )
-MERGED_TO=$( git branch --contains "${MERGE_ID}" | cut -d ' ' -f 2 )
-
-echo MERGED TO: ${MERGED_TO}
 
 
-echo
-echo
 
-if [ "${MERGED_TO}" == "dev" ]; then
+
+LATEST_MERGE_COMMIT_INFO=$( git log --merges `git describe --tags --abbrev=0`..HEAD --oneline | head -n 1 )
+
+
+LATEST_MERGE_FROM=$( expr "${LATEST_MERGE_COMMIT_INFO}" : ".* Merge branch '\(.*\)' into .*" )
+
+LATEST_MERGE_TO=$( expr "${LATEST_MERGE_COMMIT_INFO}" : ".* Merge branch .* into \(.*\)" )
+
+
+
+
+
+
+echo MERGED FROM: ${LATEST_MERGE_FROM}
+echo MERGED TO: ${LATEST_MERGE_TO}
+
+LATEST_TAG=$( git tag -l | sort -V --reverse | head -n 1 )
+
+if [ "${LATEST_MERGE_TO}" == "dev" ]; then
   echo "Merged to dev branch."
-  echo "Updating JIRA ticket for ${MERGED_FROM}"
-elif [ "${MERGED_TO}" == "test" ]; then
+  echo "Updating JIRA ticket for ${LATEST_MERGE_FROM}"
+elif [ "${LATEST_MERGE_TO}" == "test" ]; then
   echo "Merged to test branch."
-  echo "Updating JIRA ticket for ${MERGED_FROM}"
+  echo "Updating JIRA ticket for ${LATEST_MERGE_FROM}"
   # BUMP VERSION SCRIPT
   source ./bump_version_tag.sh
-elif [ "${MERGED_TO}" == "master" ]; then
+  # git push
+
+  # NOTE: may need to update this stuff so it gets a new tag. Still needs to be tested if hte line below is enough
+  LATEST_TAG=$( git tag -l | sort -V --reverse | head -n 1 )
+  # git push -a "${NEW_VERSION_TAG}" -m "Production Release Version: ${LATEST_TAG}"
+elif [ "${LATEST_MERGE_TO}" == "master" ]; then
   echo "Merged to master branch."
-  echo "Updating JIRA ticket for ${MERGED_FROM} to DONE"
+  echo "Updating JIRA ticket for ${LATEST_MERGE_FROM} to DONE"
+  # git push -a "${LATEST_TAG}" -m "Production Release Version: ${LATEST_TAG}"
 else
   echo "Error: some other branch"
 fi
-
-
 
